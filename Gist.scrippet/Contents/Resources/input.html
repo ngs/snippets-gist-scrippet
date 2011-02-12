@@ -46,6 +46,7 @@ try {
         // Provide separate environment variable for every snippet
         var snippets = Scrippet.getSnippets();
         for (var i = 0; i < snippets.length; i++) {
+          snippets[i].setProperty("SNIPPET_EXTENTION", "." + snippets[i].getExportFilename().split(".").pop() );
           snippets[i].setProperty("GIST_SNIPPET_URL", null);
         }
         

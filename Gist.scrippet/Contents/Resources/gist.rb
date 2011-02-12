@@ -1,41 +1,46 @@
-require 'rexml/document'
-require 'net/http'
+require 'net/https'
 require 'uri'
 
-url = URI.parse('http://gist.github.com/api/v1/xml/new')
+url = URI.parse('https://gist.github.com/gists')
 
 
 name = ENV['SNIPPET_EXPORT_FILENAME']
 
 puts "Uploading: #{name}"
 
+ext = ENV['SNIPPET_EXTENTION']
 description = ENV['SNIPPET_NAME']
 login = ENV['GIST_LOGIN']
 token = ENV['GIST_API_TOKEN']
 prv = ENV['GIST_IS_PRIVATE'] == '1'
 snippet = ENV['SNIPPET_SOURCE_CODE']
 
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+req = Net::HTTP::Post.new(url.path)
+
 data = {
-    'login' => login,
-    'token' => token,
+    :login => login,
+    :token => token,
     'description' => description,
-    "files[#{name}]" => snippet
+    'file_ext[gistfile1]' => ext,
+    'file_name[gistfile1]' => name,
+    'file_contents[gistfile1]' => snippet
 }
 
 if prv
-    data.merge({ 'action_button' => 'private' })
+    data = data.merge({ 'action_button' => 'private' })
 end
 
-response = Net::HTTP.post_form(url, data)
+req.form_data = data
 
-doc = REXML::Document.new(response.body)
-gist = REXML::XPath.first(doc, "/gists/gist/repo/text()")
+snippet_url = http.start{|h| h.request(req) }['Location']
 
-unless gist
+unless snippet_url
     raise "Failed to upload snippet: " << name
 end
 
-snippet_url = "http://gist.github.com/#{gist}"
 puts "Snippet is successfully uploaded at #{snippet_url}"
 
 ENV['GIST_SNIPPET_URL'] = snippet_url
