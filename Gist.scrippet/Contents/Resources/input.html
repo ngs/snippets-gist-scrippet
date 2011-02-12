@@ -5,7 +5,7 @@
     <title>Input</title>
     <meta name="author" content="Simon Schoeters">
     <link href="default.css" rel="stylesheet" type="text/css">
-    <link href="gist.css?8" rel="stylesheet" type="text/css">
+    <link href="gist.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" charset="utf-8" src="Scrippet.js"></script>
     <script type="text/javascript" charset="utf-8">
     
@@ -26,12 +26,10 @@
         checkPrivate = document.getElementById("is-private");
         paraConfirmation = document.getElementById("confirmation");
 
-try {
         inputApiToken.value = Scrippet.loadPersistentItem("GIST_API_TOKEN") || "";
         inputLogin.value = Scrippet.loadPersistentItem("GIST_LOGIN") || "";
         checkPrivate.checked = Scrippet.loadPersistentItem("GIST_IS_PRIVATE") == "1";
-} catch(e) { paraConfirmation.innerHTML = e.toString() }
-        
+
         //
         validateLogin();
         update();
@@ -72,9 +70,6 @@ try {
             ( multiple ? "s" : "" ) +
             ".";
 
-          if( prv )
-            confirmation += "<br />Leave Login and API Token blank to post as anonymous."
-
           paraConfirmation.innerHTML = confirmation;
       }
       
@@ -94,7 +89,7 @@ try {
             token = newToken;
             login = newLogin;
             valid =
-                ( prv && !login && !token ) ||
+                ( !login && !token ) ||
                 ( /^[a-f\d]{32}$/.test(token) && /^[0-9a-z\-]+$/i.test(login) );
     
             Scrippet.setDefaultButtonEnabled(valid);
@@ -121,6 +116,7 @@ try {
             Private gist
         </label>
       </p>
+      <p>Leave Login and API Token blank to post as anonymous.</p>
     </div>
   </body>
 </html>

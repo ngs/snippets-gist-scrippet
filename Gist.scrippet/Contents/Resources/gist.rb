@@ -21,8 +21,6 @@ http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 req = Net::HTTP::Post.new(url.path)
 
 data = {
-    :login => login,
-    :token => token,
     'description' => description,
     'file_ext[gistfile1]' => ext,
     'file_name[gistfile1]' => name,
@@ -31,6 +29,14 @@ data = {
 
 if prv
     data = data.merge({ 'action_button' => 'private' })
+end
+
+if login != ''
+    data = data.merge({
+      :login => login,
+      :token => token
+    })
+
 end
 
 req.form_data = data
