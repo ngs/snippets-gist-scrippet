@@ -1,7 +1,0 @@
-p.input label,
-p.input input { margin:0; float:left; display:block; }
-p.input label { width:9em; text-align:right; }
-p.input input { width:15em; text-align:left; }
-
-p.input { height:2.5em; clear:both; margin:0; }
-
