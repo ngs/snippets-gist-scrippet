@@ -15,6 +15,8 @@
         recentAPIKey = null,
         login = null,
         token = null,
+        toggle = null,
+        triangle = null,
         prv = false;
 
       Scrippet.onInitialize = function (scrippet) {
@@ -23,6 +25,8 @@
         inputLogin = document.getElementById("login");
         checkPrivate = document.getElementById("is-private");
         paraConfirmation = document.getElementById("confirmation");
+        toggle = document.getElementById("toggle");
+        triangle = document.getElementById("triangle");
 
         inputApiToken.value = Scrippet.loadPersistentItem("GIST_API_TOKEN") || "";
         inputLogin.value = Scrippet.loadPersistentItem("GIST_LOGIN") || "";
@@ -97,11 +101,6 @@
       }
 
       function toggleAuthentication() {
-        var authentication = document.getElementById("authentication");
-        var inputLogin = document.getElementById("login");
-        var inputApiToken = document.getElementById("api-token");
-        var toggle = document.getElementById("toggle");
-        var triangle = document.getElementById("triangle");
         if (authentication.style.display == "block") {
           authentication.style.display = "none";
           inputLogin.value = "";
