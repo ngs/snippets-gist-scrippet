@@ -27,7 +27,7 @@ if prv
   data = data.merge({ 'action_button' => 'private' })
 end
 
-if login != ''
+if login && login != ''
   data = data.merge({
     :login => login,
     :token => token

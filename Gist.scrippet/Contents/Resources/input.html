@@ -17,6 +17,7 @@
         token = null,
         toggle = null,
         triangle = null,
+        body = null,
         prv = false;
 
       Scrippet.onInitialize = function (scrippet) {
@@ -27,10 +28,12 @@
         paraConfirmation = document.getElementById("confirmation");
         toggle = document.getElementById("toggle");
         triangle = document.getElementById("triangle");
+        body = document.body;
 
         inputApiToken.value = Scrippet.loadPersistentItem("GIST_API_TOKEN") || "";
         inputLogin.value = Scrippet.loadPersistentItem("GIST_LOGIN") || "";
         checkPrivate.checked = Scrippet.loadPersistentItem("GIST_IS_PRIVATE") == "1";
+        setUseAuthentication( Scrippet.loadPersistentItem("GIST_USE_AUTHENTICATION") == "1" );
 
         validateLogin();
         update();
@@ -41,6 +44,7 @@
         Scrippet.storePersistentItem("GIST_API_TOKEN", getApiToken());
         Scrippet.storePersistentItem("GIST_LOGIN", getLogin());
         Scrippet.storePersistentItem("GIST_IS_PRIVATE", isPrivate() ? "1" : "");
+        Scrippet.storePersistentItem("GIST_USE_AUTHENTICATION", getUseAuthentication() ? "1" : "");
 
         // Provide separate environment variable for every snippet
         var snippets = Scrippet.getSnippets();
@@ -48,16 +52,16 @@
           snippets[i].setProperty("SNIPPET_EXTENTION", "." + snippets[i].getExportFilename().split(".").pop() );
           snippets[i].setProperty("GIST_SNIPPET_URL", null);
         }
-
-        Scrippet.setProperty("GIST_API_TOKEN", token);
-        Scrippet.setProperty("GIST_LOGIN", login);
+        if( getUseAuthentication() ) {
+            Scrippet.setProperty("GIST_API_TOKEN", token);
+            Scrippet.setProperty("GIST_LOGIN", login);
+        }
         Scrippet.setProperty("GIST_IS_PRIVATE", prv ? "1" : "");
       };
 
       function update() {
         // Setup HTML content according to the number of snippets
-        prv = document.getElementById("is-private").checked;
-        var authentication = document.getElementById("authentication");
+        prv = isPrivate();
         var snippets = Scrippet.getSnippets();
         var multiple = snippets.length > 1;
         var confirmation = "You are about to export " +
@@ -69,11 +73,6 @@
             ( multiple ? "s" : "" ) +
             ".";
         paraConfirmation.innerHTML = confirmation;
-        if (login) {
-          authentication.style.display = "block";
-          triangle.className = "down";
-          toggle.style.paddingLeft = "5px";
-        }
       }
 
       function isPrivate() { return checkPrivate.checked; }
@@ -92,26 +91,24 @@
             token = newToken;
             login = newLogin;
             valid =
-                ( !login && !token ) ||
+                ( ! getUseAuthentication() ) ||
                 ( /^[a-f\d]{32}$/.test(token) && /^[0-9a-z\-]+$/i.test(login) );
 
             Scrippet.setDefaultButtonEnabled(valid);
         }
         setTimeout(validateLogin, 200);
       }
+      
+      function getUseAuthentication() {
+        return body.className == "auth";
+      }
+      
+      function setUseAuthentication( use ) {
+        body.className = use ? "auth" : "non-auth";
+      }
 
       function toggleAuthentication() {
-        if (authentication.style.display == "block") {
-          authentication.style.display = "none";
-          inputLogin.value = "";
-          inputApiToken.value = "";
-          triangle.className = "right";
-          toggle.style.paddingLeft = "15px";
-        } else {
-          authentication.style.display = "block";
-          triangle.className = "down";
-          toggle.style.paddingLeft = "5px";
-        }
+        setUseAuthentication( !getUseAuthentication() );
       }
 
     </script>
@@ -129,12 +126,13 @@
           <label for="api-token" class="col1"><a href="http://github.com/account#admin_bucket">API Token</a></label>
           <input id="api-token" onKeyPress="if (event.keyCode == 13) Scrippet.clickDefaultButton()" maxlength="32" type="text"/>
         </li>
-        <li>
-          <span class="col1"></span>
-          <input id="is-private" type="checkbox" onClick="update();" />
-          <label for="is-private">Private gist</label>
-        </li>
       </ul>
+      <p class="left-aligned">
+        <label for="is-private">
+            <input id="is-private" type="checkbox" onClick="update();" />
+            Private gist
+        </label>
+      </p>
     </div>
   </body>
 </html>
