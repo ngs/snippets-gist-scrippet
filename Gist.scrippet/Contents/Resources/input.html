@@ -11,11 +11,13 @@
         inputApiToken = null,
         inputLogin = null,
         checkPrivate = null,
+        checkCombined = null,
         paraConfirmation = null,
         recentAPIKey = null,
         login = null,
         token = null,
         toggle = null,
+        toggleCombined = null,
         triangle = null,
         body = null,
         prv = false;
@@ -25,14 +27,17 @@
         inputApiToken = document.getElementById("api-token");
         inputLogin = document.getElementById("login");
         checkPrivate = document.getElementById("is-private");
+        checkCombined = document.getElementById("is-combined");
         paraConfirmation = document.getElementById("confirmation");
         toggle = document.getElementById("toggle");
+        toggleCombined = document.getElementById("toggle-combined");
         triangle = document.getElementById("triangle");
         body = document.body;
 
         inputApiToken.value = Scrippet.loadPersistentItem("GIST_API_TOKEN") || "";
         inputLogin.value = Scrippet.loadPersistentItem("GIST_LOGIN") || "";
         checkPrivate.checked = Scrippet.loadPersistentItem("GIST_IS_PRIVATE") == "1";
+        checkCombined.checked = Scrippet.loadPersistentItem("GIST_IS_COMBINED") == "1";
         setUseAuthentication( Scrippet.loadPersistentItem("GIST_USE_AUTHENTICATION") == "1" );
 
         validateLogin();
@@ -44,13 +49,31 @@
         Scrippet.storePersistentItem("GIST_API_TOKEN", getApiToken());
         Scrippet.storePersistentItem("GIST_LOGIN", getLogin());
         Scrippet.storePersistentItem("GIST_IS_PRIVATE", isPrivate() ? "1" : "");
+        Scrippet.storePersistentItem("GIST_IS_COMBINED", isCombined() ? "1" : "");
         Scrippet.storePersistentItem("GIST_USE_AUTHENTICATION", getUseAuthentication() ? "1" : "");
 
         // Provide separate environment variable for every snippet
         var snippets = Scrippet.getSnippets();
         for (var i = 0; i < snippets.length; i++) {
-          snippets[i].setProperty("SNIPPET_EXTENTION", "." + snippets[i].getExportFilename().split(".").pop() );
-          snippets[i].setProperty("GIST_SNIPPET_URL", null);
+          var
+            s = snippets[i],
+            filename = s.getExportFilename(),
+            ext = filename.replace(/.+\/?(\.[^w]+)$/,"$1"),
+            idx = i + 1;
+
+          if( isCombined() ) {
+            Scrippet.setProperty("GIST_SNIPPET_NAME_" + idx , s.getName() );
+            Scrippet.setProperty("GIST_SNIPPET_SOURCE_CODE_" + idx , s.getSourceCode() );
+            Scrippet.setProperty("GIST_SNIPPET_EXPORT_FILENAME_" + idx , filename);
+            Scrippet.setProperty("GIST_SNIPPET_EXTENTION_" + idx , ext );
+            s.setProperty("GIST_SNIPPET_INDEX", idx );
+          } else {
+            s.setProperty("SNIPPET_EXTENTION", ext );
+          }
+          s.setProperty("GIST_SNIPPET_URL", null); 
+        }
+        if( isCombined() ) {
+            Scrippet.setProperty("GIST_SNIPPET_COUNT", i );
         }
         if( getUseAuthentication() ) {
             Scrippet.setProperty("GIST_API_TOKEN", token);
@@ -73,9 +96,11 @@
             ( multiple ? "s" : "" ) +
             ".";
         paraConfirmation.innerHTML = confirmation;
+        toggleCombined.className = multiple ? "visible check" : "hidden";
       }
 
       function isPrivate() { return checkPrivate.checked; }
+      function isCombined() { return checkCombined.checked; }
       function getApiToken() { return inputApiToken.value; }
       function getLogin() { return inputLogin.value; }
 
@@ -127,10 +152,16 @@
           <input id="api-token" onKeyPress="if (event.keyCode == 13) Scrippet.clickDefaultButton()" maxlength="32" type="text"/>
         </li>
       </ul>
-      <p class="left-aligned">
+      <p class="check">
         <label for="is-private">
             <input id="is-private" type="checkbox" onClick="update();" />
             Private gist
+        </label>
+      </p>
+      <p class="check" id="toggle-combined">
+        <label for="is-combined">
+            <input id="is-combined" type="checkbox" onClick="update();" />
+            Combined gist
         </label>
       </p>
     </div>

@@ -19,4 +19,7 @@ body.auth #authentication { display:block }
 body.auth #triangle { left: -5px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 10px solid #ddd; display: inline; }
 body.auth #toggle { padding-left: 5px; }
 
-label[for=is-private] { margin-left: 3.5em; display:block; float:left; }
+p.check { padding-left: 3.5em; margin: 0; text-align: left; }
+
+#toggle-combined { display: none }
+#toggle-combined.visible { display: block }
